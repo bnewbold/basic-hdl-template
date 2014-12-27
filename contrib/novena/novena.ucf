@@ -17,15 +17,15 @@ OFFSET = OUT 5100 ps AFTER "bclk";
 ##################################################################################
 # Timing Ignore constraints for paths crossing the clock domain 
 ##################################################################################
-NET "eim_d_t*" TIG;
+#NET "eim_d_t*" TIG;
 
-NET "reg_wo_40010/state[*]" TIG;  # ignore fast timing on expansion-side GPIO
-NET "reg_wo_40012/state[*]" TIG;
-NET "reg_ro_41010/state[*]" TIG;
-NET "reg_ro_41012/state[*]" TIG;
+#NET "reg_wo_40010/state[*]" TIG;  # ignore fast timing on expansion-side GPIO
+#NET "reg_wo_40012/state[*]" TIG;
+#NET "reg_ro_41010/state[*]" TIG;
+#NET "reg_ro_41012/state[*]" TIG;
 
-NET "adc10cs022/adc_in[*]" TIG;  # ignore I2C asynchronous read timings
-NET "adc10cs022/adc_valid" TIG; 
+#NET "adc10cs022/adc_in[*]" TIG;  # ignore I2C asynchronous read timings
+#NET "adc10cs022/adc_valid" TIG; 
 NET "reset" TIG;
 
 ##################################################################################

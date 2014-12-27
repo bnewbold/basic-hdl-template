@@ -16,92 +16,116 @@
 // specific language governing permissions and limitations
 // under the License.
 //////////////////////////////////////////////////////////////////////////////
+//
+// This file has been modified for integration into the
+// basic-hdl-template system. It was originally downloaded from:
+//
+// https://github.com/bunnie/novena-gpbb-fpga/tree/master/novena-gpbb.srcs/sources_1/imports/imports
+//
+// GPBB-specific functionality has been removed (this is intended to be
+// a template), and the module name has been changed to 'main'.
+//
+// TODO: this specific file should be re-written to be an absolute minimal
+// example, with no coregen'd IP or external requirements.
+//
+//////////////////////////////////////////////////////////////////////////////
 
 `timescale 1ns / 1ps
 
-module novena_fpga_tb;
-   
-   // CPU EIM register interface mapping
-   reg EIM_BCLK;
-   reg [1:0] EIM_CS;
-   reg [18:16] EIM_A;
-   reg 	       EIM_LBA;
-   reg 	       EIM_OE;
-   reg 	       EIM_RW;
-   wire [15:0] EIM_DA;
-   reg [15:0]  EIM_DA_out;
-   wire [15:0] EIM_DA_in;
-   wire        EIM_DA_t;
+/// note: must set "-g UnusedPin:PullNone" in bitgen to avoid conflicts with unused pins
 
-   ////// expansion connector side mapping
-   // CPU->DUT mappings bank A
-   wire 	     F_LVDS_P15;
-   wire 	     F_LVDS_N15;
-   wire 	     F_LVDS_P0;
-   wire 	     F_LVDS_N0;
-   wire 	     F_LVDS_CK1_P;
-   wire 	     F_LVDS_CK1_N;
-   wire 	     F_DX14;
-   wire 	     F_LVDS_P4;
-   // CPU->DUT mappings bank B
-   wire 	     F_LVDS_P11;
-   wire 	     F_LVDS_N11;
-   wire 	     F_DX1;
-   wire 	     F_LVDS_NC;
-   wire 	     F_LVDS_PC;
-   wire 	     F_DX17;
-   wire 	     F_LVDS_NB;
-   wire 	     F_LVDS_PB;
-   
-   wire 	     F_LVDS_P7; // OE_N control for CPU->DUT bank A mappings
-   wire 	     F_LVDS_N7; // OE_N control for CPU->DUT bank B mappings
-   
-   // DUT->CPU mappings
-   reg 		     F_DX18;
-   reg 		     F_LVDS_CK0_N;
-   reg 		     F_LVDS_CK0_P;
-   reg 		     F_LVDS_P9;
-   reg 		     F_DX0;
-   reg 		     F_DX3;
-   reg 		     F_DX2;
-   reg 		     F_DX11;
+module main (
+		   // CPU EIM register interface mapping
+		   input wire EIM_BCLK,
+		   input wire [1:0] EIM_CS,
+		   input wire [18:16] EIM_A,
+		   input wire EIM_LBA,
+		   input wire EIM_OE,
+		   input wire EIM_RW,
+		   inout wire [15:0] EIM_DA,
 
-   /// board control
-   wire 	     F_DX15;    // output voltage select; 1 = Low V; 0 = 5V
-   reg 		     F_LVDS_NA;  // OC flag
+		   ////// expansion connector side mapping
+		   // CPU->DUT mappings bank A
+		   output wire F_LVDS_P15,
+		   output wire F_LVDS_N15,
+		   output wire F_LVDS_P0,
+		   output wire F_LVDS_N0,
+		   output wire F_LVDS_CK1_P,
+		   output wire F_LVDS_CK1_N,
+		   output wire F_DX14,
+		   output wire F_LVDS_P4,
+		   // CPU->DUT mappings bank B
+		   output wire F_LVDS_P11,
+		   output wire F_LVDS_N11,
+		   output wire F_DX1,
+		   output wire F_LVDS_NC,
+		   output wire F_LVDS_PC,
+		   output wire F_DX17,
+		   output wire F_LVDS_NB,
+		   output wire F_LVDS_PB,
 
-   /// ADC
-   wire 	     F_DX13; // CS
-   wire 	     F_DX7;  // SCLK
-   wire 	     F_DX6;  // DIN
-   reg 		     F_DX12;  // DOUT
-   
-   reg 		     I2C3_SCL;
-   wire 	     I2C3_SDA;
-   reg 		     I2C3_SDA_out;
-   wire 	     I2C3_SDA_in;
-   reg 		     I2C3_SDA_t;
-   
-   //// clocks n stuff
-   reg 		     CLK2_N; // free-runs at 50 MHz
-   reg 		     CLK2_P;
-   wire 	     FPGA_LED2;
-   reg 		     RESETBMCU;
-   wire 	     APOPTOSIS;
-   
+		   output wire F_LVDS_P7, // OE_N control for CPU->DUT bank A mappings
+		   output wire F_LVDS_N7, // OE_N control for CPU->DUT bank B mappings
+
+		   // DUT->CPU mappings
+		   input wire F_DX18,
+		   input wire F_LVDS_CK0_N,
+		   input wire F_LVDS_CK0_P,
+		   input wire F_LVDS_P9,
+		   input wire F_DX0,
+		   input wire F_DX3,
+		   input wire F_DX2,
+		   input wire F_DX11,
+
+		   /// board control
+		   output wire F_DX15,    // output voltage select, 1 = Low V, 0 = 5V
+		   input wire F_LVDS_NA,  // OC flag
+
+		   /// ADC
+		   output wire F_DX13, // CS
+		   output wire F_DX7,  // SCLK
+		   output wire F_DX6,  // DIN
+		   input wire F_DX12,  // DOUT
+		   
+		   input wire I2C3_SCL,
+		   inout wire I2C3_SDA,
+
+		   //// clocks n stuff
+		   input wire CLK2_N, // free-runs at 50 MHz
+		   input wire CLK2_P,
+		   output wire FPGA_LED2,
+		   input wire RESETBMCU,
+		   input wire BATT_NRST,
+		   input wire SMB_SCL, // unused, make sure it's not pulled down by bitgen
+		   input wire SMB_SDA,
+		   input wire DDC_SCL, // unused, make sure it's not pulled down by bitgen
+		   input wire DDC_SDA,
+		   output wire APOPTOSIS
+	 );
 
    wire [15:0] 		      eim_dout;
    wire [15:0] 		      eim_din;
-   wire 		      clk;   // free-runs at 50 MHz, unbuffered
+   (* KEEP="TRUE" *) wire 		      clk;   // free-runs at 50 MHz, unbuffered
    wire 		      clk50; // zero-delay, DLL version of above. Use this.
-   wire 		      bclk;  // NOTE: doesn't run until first CPU access to EIM; then free-runs at 133 MHz
+   (* KEEP="TRUE" *) wire  		      bclk;  // NOTE: doesn't run until first CPU access to EIM; then free-runs at 133 MHz
    reg [23:0] 		      counter;
    wire 		      reset;
 
    wire 		      bclk_dll, bclk_div2_dll, bclk_div4_dll, bclk_locked;
    wire 		      bclk_early;
    wire 		      bclk_i, bclk_o;
-   wire 		      clk25;
+   wire 		      clk25;    
+
+   // The full version of this file uses clock buffers etc; this minimal
+   // version with no coregens just takes the input and synthesizes a 25mhz
+   // variant.
+   assign clk50 = clk;
+   assign bclk = !clk;
+   reg clk25_reg = 0;
+   assign clk25 = clk25_reg;
+   always @(posedge clk50) begin
+        clk25_reg <= !clk25_reg;
+   end
    
    ////////////
    // This code section is specific to the GPBB
@@ -170,25 +194,25 @@ module novena_fpga_tb;
    wire       adc_go;
    wire [2:0] adc_chan;
    
-   wire [9:0] adc_in;
-   wire       adc_valid;
+   wire [9:0] adc_in_slowclk;
+   wire       adc_valid_slowclk;
    wire       slowclk;
+
+   reg [9:0]  adc_in;
+   reg 	      adc_valid;
+   reg [2:0]  adc_chan_slowclk;
+   reg 	      adc_go_slowclk;
    
-   adc10cs022 adc10cs022 (
-			  .DIG_ADC_CS(F_DX13),
-			  .DIG_ADC_IN(F_DX6),
-			  .DIG_ADC_OUT(F_DX12),
-			  .DIG_ADC_SCLK(F_DX7),
 
-			  .adc_in(adc_in),
-			  .adc_chan(adc_chan),
-			  .adc_valid(adc_valid),
-			  .adc_go(adc_go),
-			  
-			  .clk_3p2MHz(slowclk),
-			  .reset(reset)
-			  );
+   always @(posedge clk25) begin
+      adc_in[9:0] <= adc_in_slowclk[9:0];
+      adc_valid <= adc_valid_slowclk;
+   end
 
+   always @(posedge slowclk) begin
+      adc_chan_slowclk[2:0] <= adc_chan[2:0];
+      adc_go_slowclk <= adc_go;
+   end
    
    //////////////////////////////
    ///// The following code is used to create the EIM interface to the CPU
@@ -232,6 +256,17 @@ module novena_fpga_tb;
    ////// minor code.
    //////
    ////// This particular design gets Major version 0xB.
+   //////
+   ////// Note versions are maintained on both EIM and I2C for easy ID read-out
+   ////// Maybe should make it a parameter so there's just one place to change.
+   //////
+   // Minor version 0003, November 11 2014
+   //   Fix issue with unused pins being pulled down, causing I2C bus to fail on unconnected pins
+   //////
+   // Minor version 0002, October 29 2014
+   //   Fix timing closure (adjust .UCF to make DA pins fast-slew)
+   //   Fix BATT_NRST issue
+   //   Tighten up I2C timing to ADC
    //////
    // Minor version 0001, October 19 2014
    //   Initial design to validate GPBB
@@ -294,80 +329,6 @@ module novena_fpga_tb;
 
    wire [15:0] ro_d;
 
-   //////// write-only registers
-   reg_wo reg_wo_40000 ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h40000),
-			 .bus_d(din_r), .we(!cs0_r && !rw_r), .re(!cs0_r && rw_r), .rbk_d(ro_d), 
-			 .reg_d( r40000wo[15:0] ) );
-   
-   reg_wo reg_wo_40002 ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h40002),
-			 .bus_d(din_r), .we(!cs0_r && !rw_r), .re(1'b0), .rbk_d(ro_d), // unreadable for testing
-			 .reg_d( r40002wo[15:0] ) );
-
-
-   reg_wo reg_wo_40010 ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h40010),
-			 .bus_d(din_r), .we(!cs0_r && !rw_r), .re(!cs0_r && rw_r), .rbk_d(ro_d), 
-			 .reg_d( {cpu_to_dutB[7:0], cpu_to_dutA[7:0]} ) );
-
-   reg_wo reg_wo_40012 ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h40012),
-			 .bus_d(din_r), .we(!cs0_r && !rw_r), .re(!cs0_r && rw_r), .rbk_d(ro_d), 
-			 .reg_d( gpbb_ctl[15:0] ) );
-   
-   //////// read-only registers
-   // loopback readback
-   reg_ro reg_ro_41000 ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h41000),
-			 .bus_d(ro_d), .re(!cs0_r && rw_r),
-			 .reg_d( r40000wo[15:0] ) );
-
-   reg_ro reg_ro_41002 ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h41002),
-			 .bus_d(ro_d), .re(!cs0_r && rw_r),
-			 .reg_d( r40002wo[15:0] ) );
-
-   reg_ro reg_ro_41010 ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h41010),
-			 .bus_d(ro_d), .re(!cs0_r && rw_r),
-			 .reg_d( {8'b0,dut_to_cpu[7:0]} ) );
-
-   reg_ro reg_ro_41012 ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h41012),
-			 .bus_d(ro_d), .re(!cs0_r && rw_r),
-			 .reg_d( gpbb_stat[15:0] ) );
-
-   
-   ///////////////////////
-   // CS1 bank registers: minimum size here is 64-bit, tuned for synchronous burst access only
-   ///////////////////////
-
-   wire [63:0] 	     rC04_0000wo;
-   wire [63:0] 	     rC04_0008wo;
-   
-   ///////// write registers
-   // loopback test
-   reg_wo_4burst reg_wo_4b_C04_0000( .clk(bclk_i), .bus_ad(eim_din), .my_a(19'h4_0000), 
-				     .bus_a(EIM_A[18:16]), .adv(!EIM_LBA), .rw(EIM_RW), .cs(!EIM_CS[1]), 
-				     .reg_d( rC04_0000wo[63:0] ), .rbk_d(ro_d_b) );
-
-   reg_wo_4burst reg_wo_4b_C04_0008( .clk(bclk_i), .bus_ad(eim_din), .my_a(19'h4_0008),
-				     .bus_a(EIM_A[18:16]), .adv(!EIM_LBA), .rw(EIM_RW), .cs(!EIM_CS[1]),
-				     .reg_d( rC04_0008wo[63:0] ), .rbk_d(ro_d_b) );
-
-   ///////// read registers
-   // loopback test
-   reg_ro_4burst reg_ro_4b_C04_1000( .clk(bclk_i), .bus_ad(eim_din), .my_a(19'h4_1000),
-				     .bus_a(EIM_A[18:16]), .adv(!EIM_LBA), .rw(EIM_RW), .cs(!EIM_CS[1]),
-				     .reg_d( rC04_0000wo[63:0] ), .rbk_d(ro_d_b) );
-
-   reg_ro_4burst reg_ro_4b_C04_1008( .clk(bclk_i), .bus_ad(eim_din), .my_a(19'h4_1008),
-				     .bus_a(EIM_A[18:16]), .adv(!EIM_LBA), .rw(EIM_RW), .cs(!EIM_CS[1]),
-				     .reg_d( rC04_0008wo[63:0] ), .rbk_d(ro_d_b) );
-
-   // FPGA minor version code
-   reg_ro reg_ro_41FFC ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h41FFC),
-			 .bus_d(ro_d), .re(!cs0_r && rw_r),
-			 .reg_d( 16'h0001 ) ); // minor version
-
-   // FPGA major version code
-   reg_ro reg_ro_41FFE ( .clk(bclk_dll), .bus_a(bus_addr_r), .my_a(19'h41FFE),
-			 .bus_d(ro_d), .re(!cs0_r && rw_r),
-			 .reg_d( 16'h000B ) ); // 000B is for GPBB release
-
    ////////////////////////////////////
    ///// I2C register set -- for those who don't want to use EIM
    ////////////////////////////////////
@@ -399,60 +360,14 @@ module novena_fpga_tb;
 
 		       // ID / version code
 		       // minor / major
-		       .reg_fc(8'h00), .reg_fd(8'h02), .reg_fe(8'h00), .reg_ff(8'h04)
+		       .reg_fc(8'h00), .reg_fd(8'h03), .reg_fe(8'h00), .reg_ff(8'h0B)
 		       );
       
    ////////////////////////////////////
    ///// MASTER RESET
    ////////////////////////////////////
-   // synced to a 3.2MHz clock
-   sync_reset dll_res_sync( .glbl_reset(!RESETBMCU), .clk(slowclk), .reset(reset) );
-   
-
-   ////////////////////////////////////
-   ///// BCLK DLL -- generate zero-delay clock plus slower versions for internal use
-   ////////////////////////////////////
-   wire 	      bclk_int_in, bclk_io_in;
-   IBUFG   clkibufg (.I(EIM_BCLK), .O(bclk) );
-   BUFG    bclk_dll_bufg(.I(bclk), .O(bclk_int_in) );
-   
-   bclk_dll bclk_dll_mod( .clk133in(bclk_int_in), .clk133(bclk_dll),
-			  .RESET(reset), .LOCKED(bclk_locked));
-
-   wire 	      o_reset, o_locked;
-   wire 	      i_fbk_out, i_fbk_in;
-   wire 	      o_fbk_out, o_fbk_in;
-   
-   dcm_delay bclk_i_dll( .clk133(bclk_int_in), .clk133out(bclk_i),
-			  .CLKFB_IN(i_fbk_in), .CLKFB_OUT(i_fbk_out),
-			  .RESET(reset), .LOCKED(i_locked));
-
-   dcm_delay bclk_o_dll( .clk133(bclk_int_in), .clk133out(bclk_o),
-			  .CLKFB_IN(o_fbk_in), .CLKFB_OUT(o_fbk_out),
-			  .RESET(reset), .LOCKED(o_locked));
-   
-   // lock it to the input path
-   BUFIO2FB bclk_o_fbk(.I(bclk_o), .O(o_fbk_in));  // was this
-//   assign o_fbk_in = bclk_o;
-//   BUFG bclk_io_fbk(.I(bclk_io), .O(io_fbk_in));
-   
-   assign i_fbk_in = bclk_i;
-
-   ////////////////////////////////////
-   ///// create 3.2MHz, 25MHz, and 50MHz buffered clocks from clk using DLL
-   ////////////////////////////////////
-   wire       dll_locked;
-
-   clk_dll clk_dll
-     (// Clock in ports
-      .clk50in(clk),      // IN
-      // Clock out ports
-      .clk50(clk50),     // OUT
-      .clk25(clk25),     // OUT
-      .clk3p2(slowclk),     // OUT
-      // Status and control signals
-      .RESET(!RESETBMCU),// IN
-      .LOCKED(dll_locked));      // OUT
+   // Full version uses a synchronous reset
+   assign reset = !RESETBMCU;
    
 
    //////////////
@@ -534,7 +449,8 @@ module novena_fpga_tb;
       counter <= counter + 1;
    end
 
-   assign FPGA_LED2 = counter[23];
+   assign FPGA_LED2 = counter[23] & BATT_NRST & SMB_SCL & SMB_SDA & DDC_SCL & DDC_SDA;  // dummy-tie BATT_NRST, it's normally high
+   // the LED will also now flicker when I2C traffic happens but at least they aren't tied-down as unused inputs
 
    //////////////
    // IOBUFs as required by design
@@ -590,102 +506,8 @@ module novena_fpga_tb;
    // tie downs (unused signals as of this rev of design)
    //////////////
    assign APOPTOSIS = 1'b0; // make apoptosis inactive, tigh high to force reboot on config
-
-
-   //////////////
-   // Simulation testbench code
-   //////////////
-   parameter PERIOD_CLK = 16'd8; // 125 MHz
-   always begin
-      EIM_BCLK = 1'b0;
-      #(PERIOD_CLK/2) EIM_BCLK = 1'b1;
-      #(PERIOD_CLK/2);
-   end
-   
-   parameter PERIOD_CLK2 = 16'd20; // 50 MHz
-   always begin
-      CLK2_N = 1'b0;
-      #(PERIOD_CLK2/2) CLK2_N = 1'b1;
-      #(PERIOD_CLK2/2);
-   end
-   always begin
-      CLK2_P = 1'b1;
-      #(PERIOD_CLK2/2) CLK2_P = 1'b0;
-      #(PERIOD_CLK2/2);
-   end
-
-   assign EIM_DA = EIM_DA_t ? 16'hZZZZ : EIM_DA_out;
-   assign EIM_DA_in = EIM_DA;
-
-   assign I2C3_SDA = I2C3_SDA_t ? 1'bZ : I2C3_SDA_out;
-   assign I2C3_SDA_in = I2C3_SDA;
-   
-   assign EIM_DA_t = EIM_LBA;
-
-   task eim_rd_cycle_cs0;
-      input [18:0] adr;
-      begin
-	 EIM_LBA = 0;
-	 EIM_CS = 2'b10;
-	 EIM_A[18:16] = adr[18:16];
-	 EIM_RW = 1'b1;
-	 EIM_DA_out = 16'h3042;
-	 #(PERIOD_CLK);
-	 EIM_DA_out = adr[15:0];
-	 #(PERIOD_CLK);
-	 EIM_LBA = 1;
-	 
-	 EIM_DA_out = 16'hzzzz;
-	 #(PERIOD_CLK*5);
-
-	 #(PERIOD_CLK*16); // readback data here
-	 EIM_CS = 2'b11;
-      end
-   endtask; // eim_rd_cycle_cs0
-      
-   initial begin
-      EIM_CS = 2'b11;
-      EIM_A[18:16] = 3'b000;
-      EIM_LBA = 1'b0;
-      EIM_OE = 1'b1;
-      EIM_RW = 1'b0;
-      EIM_DA_out = 16'b0;
-
-      F_DX18 = 1'b0; 
-      F_LVDS_CK0_N = 1'b0;
-      F_LVDS_CK0_P = 1'b0;
-      F_LVDS_P9 = 1'b0;
-      F_DX0 = 1'b0;
-      F_DX3 = 1'b0;
-      F_DX2 = 1'b0;
-      F_DX11 = 1'b0;
-
-      F_LVDS_NA = 1'b0;
-      F_DX12 = 1'b0;
-
-      I2C3_SDA_out = 1'b0;
-      I2C3_SDA_t = 1'b1;
-
-      RESETBMCU = 1'b0;
-
-      counter = 24'b0;
-      
-      #(PERIOD_CLK*16);
-
-      RESETBMCU = 1'b1;
-      $stop;
-      
-      #(PERIOD_CLK*16);
-      
-      repeat( 10 ) begin
-	 eim_rd_cycle_cs0(19'h41FFE); // read the version ID registers
-	 #(PERIOD_CLK*30);
-	 eim_rd_cycle_cs0(19'h41FFC);
-	 #(PERIOD_CLK*30);
-      end
-      
-      $stop;
-   end
-   
+   assign F_DX6 = 1'b0;     // unused
+   assign F_DX7 = 1'b0;     // unused
+   assign F_DX13 = 1'b0;    // unused
    
 endmodule
