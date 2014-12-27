@@ -1,7 +1,7 @@
 # novena device-specific configuration variables
 # put targets in targets.mk, not this file
 
-board := novena 
+board := novena
 family := spartan6
 device := XC6SLX45
 speedgrade := -3
