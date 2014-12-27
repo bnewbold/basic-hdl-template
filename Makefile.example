@@ -16,6 +16,11 @@ vendor := xilinx
 include ./contrib/xula2/settings.mk
 extra_includes += ./contrib/xula2/targets.mk
 
+### Uncomment these lines to use the Novena dev board with default config
+### See also ./contrib/novena/README.novena
+#include ./contrib/novena/settings.mk
+#extra_includes += ./contrib/novena/targets.mk
+
 ### Edit and uncomment the below lines to use a custom board
 #board := exampleboard
 #family := spartan6

@@ -1,0 +1,3 @@
+-g Binary:yes
+# below are novena-specific configurations
+-g UnusedPin:Pullnone
