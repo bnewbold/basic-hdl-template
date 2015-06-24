@@ -14,3 +14,8 @@ upgrade the PIC microcontroller firmware:
 
     sudo xsusbprg.py
 
+If you get "ImportError: No module named core", you may have python-usb 0.x
+installed instead of 1.0. You can install with pip instead:
+
+    sudo apt-get remove python-usb
+    sudo pip install pyusb --upgrade
